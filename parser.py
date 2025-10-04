@@ -45,6 +45,16 @@ def top_ips(parsed):
         print(f"{ip}: {count}")
 
 
+def top_urls(parsed):
+    top_urls = defaultdict(int)
+
+    for rec in parsed:
+        top_urls[rec["path"]] += 1
+
+    for path, count in sorted(top_urls.items(), key=lambda x: x[1], reverse=True):
+        print(f"{path}: {count}")
+
+
 def parse_stream(f):
     for lineno, line in enumerate(f, 1):
         parsed = parse_line(line)
@@ -55,6 +65,7 @@ def parse_stream(f):
 if __name__ == "__main__":
     p = argparse.ArgumentParser()
     p.add_argument("--top_ips", action="store_true", help="count top ip addrs")
+    p.add_argument("--top_urls", action="store_true", help="count top url addrs")
     p.add_argument("--output_jsonl", action="store_true", help="output parsed data as jsonl")
     args = p.parse_args()
 
@@ -62,6 +73,9 @@ if __name__ == "__main__":
 
     if args.top_ips:
         top_ips(parse_stream(src))
+
+    if args.top_urls:
+        top_urls(parse_stream(src))
 
     if args.output_jsonl:
         for rec in parse_stream(src):
