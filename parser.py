@@ -56,6 +56,22 @@ def top_urls(parsed):
         print(f"{path}: {count}")
 
 
+def top_statuses(parsed):
+    top_statuses = {}
+
+    for rec in parsed:
+        path = rec["path"]
+        status = rec["status"]
+
+        top_statuses.setdefault(status, {})
+        top_statuses[status].setdefault(path, 0)
+        top_statuses[status][path] += 1
+
+    for status, path_count in sorted(top_statuses.items(), key=lambda x: x[0]):
+        for path, cnt in sorted(path_count.items(), key=lambda x: x[1], reverse=True):
+            print(f"{status}: {path}: {cnt}")
+
+
 def parse_stream(f):
     for lineno, line in enumerate(f, 1):
         parsed = parse_line(line)
@@ -67,6 +83,7 @@ if __name__ == "__main__":
     p = argparse.ArgumentParser()
     p.add_argument("--top_ips", action="store_true", help="count top ip addrs")
     p.add_argument("--top_urls", action="store_true", help="count top url addrs")
+    p.add_argument("--top_status", action="store_true", help="count top by status")
     p.add_argument("--output_jsonl", action="store_true", help="output parsed data as jsonl")
     args = p.parse_args()
 
@@ -77,6 +94,9 @@ if __name__ == "__main__":
 
     if args.top_urls:
         top_urls(parse_stream(src))
+
+    if args.top_status:
+        top_statuses(parse_stream(src))
 
     if args.output_jsonl:
         for rec in parse_stream(src):
